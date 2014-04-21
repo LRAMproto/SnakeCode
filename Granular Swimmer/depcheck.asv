@@ -1,0 +1,7 @@
+function dcheck = depcheck(target,subfile)
+
+r = dir(target)
+
+
+
+end
