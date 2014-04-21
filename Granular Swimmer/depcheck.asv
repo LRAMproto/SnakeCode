@@ -1,6 +1,9 @@
 function dcheck = depcheck(target,subfile)
 
-r = dir(target)
+r1 = dir(target);
+r2 = dir(subfile);
+
+
 
 
 

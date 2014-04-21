@@ -1,9 +1,31 @@
-function dcheck = depcheck(target,subfile)
+function older = depcheck(target,refrence)
 
-r1 = dir(target);
-r2 = dir(subfile);
+target_info = dir(target);
+reference_info = dir(refrence);
 
 
-
+	% Extract the oldest in the target and the most recent date in the
+	% reference
+	if ~isempty(target_info)
+		target_date = min([target_info.datenum]);
+	else
+		target_date = [];
+	end
+	
+	if ~isempty(reference_info)
+		reference_date = max([reference_info.datenum]);
+	else
+		reference_date = [];
+	end
+	
+	
+	% Handle the case where one does not exist
+	if isempty(reference_date)
+		older = 0;
+	elseif isempty(target_date)
+		older = 1;
+	else % Compare the dates
+		older = target_date < reference_date;
+	end
 
 end

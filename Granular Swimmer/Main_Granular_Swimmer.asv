@@ -13,12 +13,12 @@ S.Range = 8;               % Number of segments in each link for integrating
 S.Model = 'real_model';
 
 % Shape Velocity
-dalpha1 = linspace(-1,1,5);
-dalpha2 = linspace(-1,1,5);
+dalpha1 = linspace(-1,1,11);
+dalpha2 = linspace(-1,1,11);
 
 % Range of variation of alpha (shape change)
-R_alpha1 = linspace(-2.5,2.5,5);
-R_alpha2 = linspace(-2.5,2.5,5);
+R_alpha1 = linspace(-2.5,2.5,11);
+R_alpha2 = linspace(-2.5,2.5,11);
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -35,12 +35,16 @@ if exist(BodyVelocityfile,'file')
     % Load the Local_Connection file
     load('Initial_Body_Velocity');
     
-    subfile = fullfile(pwd,'granular_data',BodyVelocityfile);
+    refrence = fullfile(pwd,'granular_data',BodyVelocityfile);
     
-    dcheck = depcheck(target,subfile);
+    % This function check if the target function is older than any file it 
+    % depends on, or younger than any file it produces. varargin should 
+    % contain any other arguments passed to the target file to help it in
+    its dependency-check
+    dcheck = depcheck(target,refrence);
     
-
-elseif ~exist(BodyVelocityfile,'file')
+end
+if ~exist(BodyVelocityfile,'file') || ~dcheck
     
     Xi0.x = cell(length(R_alpha1),length(R_alpha2));
     Xi0.y = cell(length(R_alpha1),length(R_alpha2));
