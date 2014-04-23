@@ -3,22 +3,29 @@ clear all
 
 % Initial Values
 S.L = 1;                   % The link length
-S.r = 0.2;                 % The radius of the cylinder
+S.r = 0.025;                 % The radius of the cylinder
 S.K = 0.5;                 % The differential viscous drag constant
+% Body parameteres
 S.C_S = 7.70;              % Granular parameter
 S.C_F = 2.79;              % Granular parameter
 S.C_L = -2.03;             % Granular parameter
 S.gama = 1.57;             % Granular parameter
+% Head parameters
+S.C_S = 7.70;              % Granular parameter
+S.C_F = 2.79;              % Granular parameter
+S.C_L = -2.03;             % Granular parameter
+S.gama = 1.57;             % Granular parameter
+
 S.Range = 8;               % Number of segments in each link for integrating
-S.Model = 'real_model';
+S.Model = 'basic_model';
 
 % Shape Velocity
-dalpha1 = linspace(-1,1,11);
-dalpha2 = linspace(-1,1,11);
+dalpha1 = linspace(-1,1,5);
+dalpha2 = linspace(-1,1,5);
 
 % Range of variation of alpha (shape change)
-R_alpha1 = linspace(-2.5,2.5,11);
-R_alpha2 = linspace(-2.5,2.5,11);
+R_alpha1 = linspace(-2.5,2.5,5);
+R_alpha2 = linspace(-2.5,2.5,5);
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -38,9 +45,7 @@ if exist(BodyVelocityfile,'file')
     refrence = fullfile(pwd,'granular_data',BodyVelocityfile);
     
     % This function check if the target function is older than any file it 
-    % depends on, or younger than any file it produces. varargin should 
-    % contain any other arguments passed to the target file to help it in
-    its dependency-check
+    % depends on, or younger than any file it produces.
     dcheck = depcheck(target,refrence);
     
 end

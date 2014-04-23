@@ -56,7 +56,7 @@ scale_factor = min(xspacing/xrange, yspacing/yrange)*max_fill;
 % for l = 1:length(C)
 %     for n = 1:length(C)
         
-        circles1 = cellfun(@(u)u*scale_factor,circles,'UniformOutput',false);
+        circles1 = cellfun(@(u)u*scale_factor,{C_data},'UniformOutput',false);
         
 %     end
 % end

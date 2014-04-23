@@ -23,6 +23,7 @@ function [A,C_data,C_ellipse_data] = Connection_Vector_Solver(Xi0,S,alpha,R_alph
             Xi.y(i,j) = Xi1(2);
             Xi.theta(i,j) = Xi1(3);
             
+            % Compute the torques using the body velocity
 %             [T] = Metric_Calc(Xi1,alpha,dalpha_p,S);
 %             
 %             T1(i,j) = T(1);
@@ -43,7 +44,7 @@ function [A,C_data,C_ellipse_data] = Connection_Vector_Solver(Xi0,S,alpha,R_alph
     A = ConnectionVector_Calc1(Reg);
     
 
-%% Compute the Torques on each joint
+%% Compute the Torques on each joint using the regression of Body Velocity
 %{...
     for i = 1:length(dalpha(1,:))
 
@@ -119,24 +120,29 @@ switch mode
 
 %             circles1 = Power_Comparison(C_data,'Power_Comparison',{});
 % 
-%             figure(2)
+%             figure(3)
 
-            if n == 1
 
+%             if n == 3
+% 
+%                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
+%                 legend('Power = 4','Power = 6', 'Power = 8')
+%                 str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
+% 
+%                 title(str)
+%                 axis equal
+%                 axis square
+%                 
+%             elseif n == 1
+%                 
 %                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','black','LineWidth',2),circles1);
-
-            else
-
-                PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
-                legend('Power = 4','Power = 6')
-                str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
-
-                title(str)
-                axis equal
-                axis square
-
-            end
-
+%                 
+%             else
+%                 
+%                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','blue','LineWidth',2),circles1);
+% 
+%             end
+% 
 %             hold on
 
         end

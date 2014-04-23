@@ -23,7 +23,7 @@ end
 % Extract the data from the contour in specific power
 figure(1)
 % [C,h] = contour(dalpha1,dalpha2,P,[2*n+2 2*n+2]);
-[C,h] = contour(dalpha1,dalpha2,P,[0.5 0.5]);
+[C,h] = contour(dalpha1,dalpha2,P,[4 4]);
 
 figure(2)
 contour3(dalpha1,dalpha2,P);

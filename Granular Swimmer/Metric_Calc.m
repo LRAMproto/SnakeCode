@@ -3,7 +3,6 @@ function [T] = Metric_Calc(Xi,alpha,dalpha,S)
 % Initial Value
 T1 = 0; T2 = 0;
 Mid = round(S.Range/2)+1;    % Mid point of each Rod
-N = 3;                     % Number of Links
 delta_L = 2*S.L/S.Range;   % segments of integral per length of rod
     
 for i = 1:S.Range
@@ -51,14 +50,40 @@ for i = 1:S.Range
         
             case 'basic_model'
                 
-                
                 % "beta" is an angle used in drag forces defined as follow and "gama" is a constant parameter
                 beta0 = atan(S.gama*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
                 
                 % C_F, C_L, C_F are constant parameters obtained from experience 
-                Fx = (delta_L)*[S.C_F*cos(psi(1)) + S.C_L*(1 - sin(psi(1)))  S.C_F*cos(psi(2)) + S.C_L*(1 - sin(psi(2)))  S.C_F*cos(psi(3)) + S.C_L*(1 - sin(psi(3)))];
-                Fy = (delta_L)*[S.C_S*sin(beta0(1))  S.C_S*sin(beta0(2))  S.C_S*sin(beta0(3))];
-                M  = [0 0 0];
+                Fx_b = (delta_L)*[S.C_F*cos(psi(1)) + S.C_L*(1 - sin(psi(1)))  S.C_F*cos(psi(2)) + S.C_L*(1 - sin(psi(2)))  S.C_F*cos(psi(3)) + S.C_L*(1 - sin(psi(3)))];
+                Fy_b = (delta_L)*[S.C_S*sin(beta0(1))  S.C_S*sin(beta0(2))  S.C_S*sin(beta0(3))];
+                M_b  = [0 0 0];
+                
+                % Force equation for head                
+                if S.head
+                    
+                    if i == 1
+                    
+                        psi_head(1) = pi/2 - psi(1);
+                        psi_head(2) = pi/2 - psi(2);
+                        psi_head(3) = pi/2 - psi(3);
+
+                        beta0_head = atan(S.head_gama*[sin(psi_head(1)) sin(psi_head(2)) sin(psi_head(3))]);
+
+                        Fx_head = (2*S.r)*[S.head_C_F*cos(psi_head(1)) + S.head_C_L*(1 - sin(psi_head(1)))  S.head_C_F*cos(psi_head(2)) + S.head_C_L*(1 - sin(psi_head(2)))  S.head_C_F*cos(psi_head(3)) + S.head_C_L*(1 - sin(psi(3)))];
+                        Fy_head = (2*S.r)*[S.head_C_S*sin(beta0_head(1))  S.head_C_S*sin(beta0_head(2))  S.head_C_S*sin(beta0_head(3))];
+                        M_head  = [0 0 0];
+                    
+                    end
+                
+                else
+                    
+                    Fx_head = 0; Fy_head = 0; M_head = 0;
+                    
+                end
+                
+                Fx = Fx_head + Fx_b;
+                Fy = Fy_head + Fy_b;
+                M = M_head + M_b;
                 
             case 'real_model'
                 
@@ -66,9 +91,10 @@ for i = 1:S.Range
                 beta0 = atan(cot(S.gama)*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
                 beta0p = atan(cot(S.gama)*[sin(pi/2 - psi(1)) sin(pi/2 - psi(2)) sin(pi/2 - psi(3))]);
                 
+                e = 4;
                 % C_F, C_L, C_F are constant parameters obtained from experience 
-                Fx = [2*(delta_L)*S.r*(S.C_F*cos(psi(1))) + pi*(S.r^2)*S.C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.C_F*cos(psi(2))) + pi*(S.r^2)*S.C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.C_F*cos(psi(3))) + pi*(S.r^2)*S.C_S*(sin(beta0p(3)))];
-                Fy = [2*(delta_L)*S.r*(S.C_S*sin(beta0(1)) + S.C_F*(sin(psi(1)))) + pi*(S.r^2)*S.C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(2)) + S.C_F*(sin(psi(2)))) + pi*(S.r^2)*S.C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(3)) + S.C_F*(sin(psi(3)))) + pi*(S.r^2)*S.C_F*(sin(psi(3)))];
+                Fx = [2*(delta_L)*S.r*(S.C_F*cos(psi(1))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.C_F*cos(psi(2))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.C_F*cos(psi(3))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(3)))];
+                Fy = [2*(delta_L)*S.r*(S.C_S*sin(beta0(1)) + S.C_F*(sin(psi(1)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(2)) + S.C_F*(sin(psi(2)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(3)) + S.C_F*(sin(psi(3)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(3)))];
                 M  = [0 0 0];
                 
         end
