@@ -69,21 +69,48 @@ for i = 1:S.Range
 
                         beta0_head = atan(S.head_gama*[sin(psi_head(1)) sin(psi_head(2)) sin(psi_head(3))]);
 
-                        Fx_head = (2*S.r)*[S.head_C_F*cos(psi_head(1)) + S.head_C_L*(1 - sin(psi_head(1)))  S.head_C_F*cos(psi_head(2)) + S.head_C_L*(1 - sin(psi_head(2)))  S.head_C_F*cos(psi_head(3)) + S.head_C_L*(1 - sin(psi(3)))];
-                        Fy_head = (2*S.r)*[S.head_C_S*sin(beta0_head(1))  S.head_C_S*sin(beta0_head(2))  S.head_C_S*sin(beta0_head(3))];
-                        M_head  = [0 0 0];
-                    
+%                         Fx_head(1) = (2*S.r)*[S.head_C_F*cos(psi_head(1)) + S.head_C_L*(1 - sin(psi_head(1)))  S.head_C_F*cos(psi_head(2)) + S.head_C_L*(1 - sin(psi_head(2)))  S.head_C_F*cos(psi_head(3)) + S.head_C_L*(1 - sin(psi(3)))];
+%                         Fy_head(1) = (2*S.r)*[S.head_C_S*sin(beta0_head(1))  S.head_C_S*sin(beta0_head(2))  S.head_C_S*sin(beta0_head(3))];
+%                         M_head(1)  = [0 0 0];
+
+                        Fx_head1 = (2*S.r)*[S.head_C_F*cos(psi_head(1)) + S.head_C_L*(1 - sin(psi_head(1)))];
+                        Fy_head1 = (2*S.r)*[S.head_C_S*sin(beta0_head(1))];
+                        M_head1  = [0];
+                        
+                        Fx_head3 = 0; Fy_head3 = 0; M_head3 = 0;
+                        
+                    elseif i == S.Range
+                        
+                        psi_head(1) = pi/2 - psi(1);
+                        psi_head(2) = pi/2 - psi(2);
+                        psi_head(3) = pi/2 - psi(3);
+
+                        beta0_head = atan(S.head_gama*[sin(psi_head(1)) sin(psi_head(2)) sin(psi_head(3))]);
+                        
+%                         Fx_head3 = (2*S.r)*[S.head_C_F*cos(psi_head(1)) + S.head_C_L*(1 - sin(psi_head(1)))  S.head_C_F*cos(psi_head(2)) + S.head_C_L*(1 - sin(psi_head(2)))  S.head_C_F*cos(psi_head(3)) + S.head_C_L*(1 - sin(psi(3)))];
+%                         Fy_head3 = (2*S.r)*[S.head_C_S*sin(beta0_head(1))  S.head_C_S*sin(beta0_head(2))  S.head_C_S*sin(beta0_head(3))];
+%                         M_head3  = [0 0 0];
+              
+                        Fx_head3 = (2*S.r)*[S.head_C_F*cos(psi_head(3)) + S.head_C_L*(1 - sin(psi(3)))];
+                        Fy_head3 = (2*S.r)*[S.head_C_S*sin(beta0_head(3))];
+                        M_head3  = [0];
+                        
+                        Fx_head1 = 0; Fy_head1 = 0; M_head1 = 0;
+                        
+                    else
+                        Fx_head1 = 0; Fy_head1 = 0; M_head1 = 0; Fx_head3 = 0; Fy_head3 = 0; M_head3 = 0;
+                        
                     end
                 
                 else
                     
-                    Fx_head = 0; Fy_head = 0; M_head = 0;
+                    Fx_head3 = 0; Fy_head3 = 0; M_head3 = 0; Fx_head1 = 0; Fy_head1 = 0; M_head1 = 0;
                     
                 end
                 
-                Fx = Fx_head + Fx_b;
-                Fy = Fy_head + Fy_b;
-                M = M_head + M_b;
+%                 Fx = Fx_head + Fx_b;
+%                 Fy = Fy_head + Fy_b;
+%                 M = M_head + M_b;
                 
             case 'real_model'
                 
@@ -91,11 +118,17 @@ for i = 1:S.Range
                 beta0 = atan(cot(S.gama)*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
                 beta0p = atan(cot(S.gama)*[sin(pi/2 - psi(1)) sin(pi/2 - psi(2)) sin(pi/2 - psi(3))]);
                 
+                % 'e' is a parameter that can change the head surface between flat
+                % circle or semi-sphare. e = 1 ---> flat head, e = 4 --->
+                % semi-sphare head.
                 e = 4;
+                
                 % C_F, C_L, C_F are constant parameters obtained from experience 
                 Fx = [2*(delta_L)*S.r*(S.C_F*cos(psi(1))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.C_F*cos(psi(2))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.C_F*cos(psi(3))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(3)))];
                 Fy = [2*(delta_L)*S.r*(S.C_S*sin(beta0(1)) + S.C_F*(sin(psi(1)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(2)) + S.C_F*(sin(psi(2)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(3)) + S.C_F*(sin(psi(3)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(3)))];
                 M  = [0 0 0];
+                
+                Fx_head1 = 0; Fy_head1 = 0; M_head1 = 0; Fx_head3 = 0; Fy_head3 = 0; M_head3 = 0;
                 
         end
                 
@@ -103,8 +136,8 @@ for i = 1:S.Range
         % Obtaining the relationship between the torque on each link and the
         % generalized velocities
         % T = Mp.dalpha   ### Mp = f(alpha)
-        T1 = Fy(1)*((S.Range-i)*(delta_L) + delta_L/2) + T1;
-        T2 = Fy(3)*((i-1)*(delta_L) + delta_L/2) + T2;
+        T1 = Fy_b(1)*((S.Range-i)*(delta_L) + delta_L/2) + Fy_head1*S.L + T1;
+        T2 = Fy_b(3)*((i-1)*(delta_L) + delta_L/2) + Fy_head3*S.L + T2;
                 
 end
     

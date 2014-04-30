@@ -56,14 +56,14 @@ for NN = 1:N
                 beta0 = atan(S.gama*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
                 
                 % C_F, C_L, C_F are constant parameters obtained from experience 
-                Fx_b = (delta_L)*[S.C_F*cos(psi(1)) + S.C_L*(1 - sin(psi(1)))  S.C_F*cos(psi(2)) + S.C_L*(1 - sin(psi(2)))  S.C_F*cos(psi(3)) + S.C_L*(1 - sin(psi(3)))];
-                Fy_b = (delta_L)*[S.C_S*sin(beta0(1))  S.C_S*sin(beta0(2))  S.C_S*sin(beta0(3))];
-                M_b  = [0 0 0];
+                Fx = (delta_L)*[S.C_F*cos(psi(1)) + S.C_L*(1 - sin(psi(1)))  S.C_F*cos(psi(2)) + S.C_L*(1 - sin(psi(2)))  S.C_F*cos(psi(3)) + S.C_L*(1 - sin(psi(3)))];
+                Fy = (delta_L)*[S.C_S*sin(beta0(1))  S.C_S*sin(beta0(2))  S.C_S*sin(beta0(3))];
+                M  = [0 0 0];
                 
-                % Force equation for head                
+                % Force equation for head
                 if S.head
                     
-                    if (NN == 1 && i == 1) || (NN == 3 && i == 1)
+                    if (NN == 1 && i == 1) || (NN == 3 && i == S.Range)
                     
                         psi_head(1) = pi/2 - psi(1);
                         psi_head(2) = pi/2 - psi(2);
@@ -75,17 +75,21 @@ for NN = 1:N
                         Fy_head = (2*S.r)*[S.head_C_S*sin(beta0_head(1))  S.head_C_S*sin(beta0_head(2))  S.head_C_S*sin(beta0_head(3))];
                         M_head  = [0 0 0];
                     
+                    else
+                        Fx_head = [0 0 0]; Fy_head = [0 0 0]; M_head = [0 0 0];
                     end
                 
                 else
                     
-                    Fx_head = 0; Fy_head = 0; M_head = 0;
+                    Fx_head = [0 0 0]; Fy_head = [0 0 0]; M_head = [0 0 0];
                     
                 end
                 
-                Fx = Fx_head + Fx_b;
-                Fy = Fy_head + Fy_b;
-                M = M_head + M_b;
+                V_F_head = [Fx_head; Fy_head; M_head];
+
+                % Forces on head
+                F_h(:,1) = [cos(alpha(1)) sin(alpha(1)) 0 ; -sin(alpha(1)) cos(alpha(1)) 0 ; 0 -2*S.L  0]*V_F_head(:,1); 
+                F_h(:,3) = [cos(alpha(2)) -sin(alpha(2)) 0 ; sin(alpha(2)) cos(alpha(2)) 0 ; 0 -2*S.L  0]*V_F_head(:,3);
                                 
                 
             case 'real_model'
@@ -94,7 +98,11 @@ for NN = 1:N
                 beta0 = atan(cot(S.gama)*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
                 beta0p = atan(cot(S.gama)*[sin(pi/2 - psi(1)) sin(pi/2 - psi(2)) sin(pi/2 - psi(3))]);
                 
+                % 'e' is a parameter that can change the head surface between flat
+                % circle or semi-sphare. e = 1 ---> flat head, e = 4 --->
+                % semi-sphare head
                 e = 4;
+                
                 % C_F, C_L, C_F are constant parameters obtained from experience 
                 Fx = [2*(delta_L)*S.r*(S.C_F*cos(psi(1))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.C_F*cos(psi(2))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.C_F*cos(psi(3))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(3)))];
                 Fy = [2*(delta_L)*S.r*(S.C_S*sin(beta0(1)) + S.C_F*(sin(psi(1)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(2)) + S.C_F*(sin(psi(2)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(3)) + S.C_F*(sin(psi(3)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(3)))];
@@ -108,10 +116,16 @@ for NN = 1:N
         F(:,1) = [cos(alpha(1)) sin(alpha(1)) 0 ; -sin(alpha(1)) cos(alpha(1)) 0 ; 0 -((delta_L/2) + (Mid - (i+1))*delta_L)  0]*V_F(:,1); 
         F(:,2) = [cos(0) -sin(0) 0 ; sin(0) cos(0) 0 ; 0 -((delta_L/2) + (Mid - (i+1))*delta_L) 0]*V_F(:,2);                              
         F(:,3) = [cos(alpha(2)) -sin(alpha(2)) 0 ; sin(alpha(2)) cos(alpha(2)) 0 ; 0 -((delta_L/2) + (Mid - (i+1))*delta_L)  0]*V_F(:,3);  
+        
+
 
         % Sum up the forces on each link and then the whole force of the
         % system
-        F1 = F1 + (F(:,NN));
+        if ~exist('F_h','var')
+            F_h = [];
+        end
+        
+        F1 = F1 + (F(:,NN)) + F_h(:,NN);
 
     end
     

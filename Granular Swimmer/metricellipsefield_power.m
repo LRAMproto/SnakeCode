@@ -87,7 +87,7 @@ xspacing = min(diff(x(:,1)));
 yspacing = min(diff(y(1,:)));
 
 % Set the percentage of the spacing that the largest element should occupy
-max_fill = 1;
+max_fill = 0.6;
 
 % Determine if x or y fitting is the limiting factor for the plot and set
 % the scaling accordingly

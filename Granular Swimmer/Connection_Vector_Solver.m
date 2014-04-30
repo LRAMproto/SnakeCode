@@ -1,4 +1,4 @@
-function [A,C_data,C_ellipse_data] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
+function [A,C_data,C_ellipse_data,Reg_C_data] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
 
 
     for i = 1:length(dalpha(1,:))
@@ -80,7 +80,7 @@ switch mode
         
         % This function Plot the power as an contour and extract the data of
         % the contour in desire power.
-        [P,C] = Power_Plot(T1,T2,dalpha,1);
+        [P,C,Reg_C] = Power_Plot(T1,T2,dalpha,1);
 
         % Seperate the data of the contour for specific power and put them into
         % the individual cell.
@@ -106,7 +106,10 @@ switch mode
 
             % This function Plot the power as an contour and extract the data of
             % the contour in desire power.
-            [P,C] = Power_Plot(T1,T2,dalpha,n);
+            % 'Reg_C' is the elliptic cone estimation of power plot
+            [P,C,Reg_C] = Power_Plot(T1,T2,dalpha,n);
+            
+            Reg_C_data = Reg_C(:,2:end);
 
             % Seperate the data of the contour for specific power and put them into
             % the individual cell.
@@ -118,32 +121,36 @@ switch mode
 
             end
 
-%             circles1 = Power_Comparison(C_data,'Power_Comparison',{});
-% 
-%             figure(3)
+            % This part evaluate the power plot by scaling different
+            % contour of power at the same size and then comparissing them
+            if S.Power_comparison
+            
+                circles1 = Power_Comparison(C_data,'Power_Comparison',{});
 
+                figure(3)
 
-%             if n == 3
-% 
-%                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
-%                 legend('Power = 4','Power = 6', 'Power = 8')
-%                 str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
-% 
-%                 title(str)
-%                 axis equal
-%                 axis square
-%                 
-%             elseif n == 1
-%                 
-%                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','black','LineWidth',2),circles1);
-%                 
-%             else
-%                 
-%                 PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','blue','LineWidth',2),circles1);
-% 
-%             end
-% 
-%             hold on
+                if n == 3
+
+                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
+                    legend('Power = 4','Power = 6', 'Power = 8')
+                    str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
+                    title(str)
+                    axis equal
+                    axis square
+
+                elseif n == 1
+
+                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','black','LineWidth',2),circles1);
+
+                else
+
+                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','blue','LineWidth',2),circles1);
+
+                end
+
+                hold on
+            
+            end % end of power comparison
 
         end
         

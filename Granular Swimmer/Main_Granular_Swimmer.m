@@ -3,7 +3,7 @@ clear all
 
 % Initial Values
 S.L = 1;                   % The link length
-S.r = 0.1;               % The radius of the cylinder
+S.r = 0.05;               % The radius of the cylinder
 S.K = 0.5;                 % The differential viscous drag constant
 % Body parameters
 S.C_S = 7.70;              % Granular parameter
@@ -11,22 +11,24 @@ S.C_F = 2.79;              % Granular parameter
 S.C_L = -2.03;             % Granular parameter
 S.gama = 1.57;             % Granular parameter
 % Head parameters
-S.head = 1;                % If head should be considred put 1 otherwise put 0.
+S.head = 0;                % If head should be considred put 1 otherwise put 0.
 S.head_C_S = 42.16;        % Granular parameter
 S.head_C_F = 1.87;         % Granular parameter
 S.head_C_L = -1.58;        % Granular parameter
 S.head_gama = 0.088;       % Granular parameter
 
+S.Power_comparison = 0;    % If power comparison of different contour is required put 1 otherwise put 0.
+
 S.Range = 8;               % Number of segments in each link for integrating
 S.Model = 'basic_model';
 
 % Shape Velocity
-dalpha1 = linspace(-1,1,5);
-dalpha2 = linspace(-1,1,5);
+dalpha1 = linspace(-1,1,11);
+dalpha2 = linspace(-1,1,11);
 
 % Range of variation of alpha (shape change)
-R_alpha1 = linspace(-2.5,2.5,5);
-R_alpha2 = linspace(-2.5,2.5,5);
+R_alpha1 = linspace(-2.5,2.5,11);
+R_alpha2 = linspace(-2.5,2.5,11);
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -96,11 +98,12 @@ for i = 1:length(R_alpha1)
         Xi.theta = Xi0.theta{i,j};
         alpha = [R_alpha1(i); R_alpha2(j)];
         
-        [A,C_data,C_ellipse_data] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
+        [A,C_data,C_ellipse_data,Reg_C_data] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
 
         A1{i,j} = A;
         Contour_data{i,j} = C_data;
         Contour_ellipse_data{i,j} = C_ellipse_data;
+        Contour_Reg_C_data{i,j} = Reg_C_data;
 
     end
      
@@ -152,7 +155,7 @@ Vecfield = cell(2,1);
 
 % This function get the metric and grid for shape angles and plot ellipse
 % field of a metric tensor (Mp)
-h = metricellipsefield_power1(Vecfield{1},Vecfield{2},Contour_data,'tissot',{});
+h = metricellipsefield_power(Vecfield{1},Vecfield{2},Contour_Reg_C_data,'tissot',{});
 
 
 figure(4)
