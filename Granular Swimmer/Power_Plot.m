@@ -1,4 +1,4 @@
-function [P,C,Reg_C] = Power_Plot(T1,T2,dalpha,n)
+function [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n)
 % This function plot the contour of the Power dissipated through the joints
 % as a function of shape velocities for determined shape angles
 dalpha1 = dalpha(1,:);
@@ -21,16 +21,16 @@ end
 [dalpha1,dalpha2] = ndgrid(dalpha1,dalpha2);
 
 % This function estimate the bowl shape power as an elliptic power
-Reg_P = elliptic_power_estimation(P,dalpha1,dalpha2);
+[Reg_P,Metric_Tensor] = elliptic_power_estimation(P,dalpha1,dalpha2);
 
 
 % Extract the data from the contour in specific power
 figure(1)
 % [C,h] = contour(dalpha1,dalpha2,P,[2*n+2 2*n+2]);
-[C,h] = contour(dalpha1,dalpha2,P,[4 4]);
+[C,h] = contour(dalpha1,dalpha2,P,[5 5]);
 
 figure(10)
-[Reg_C,Reg_h] = contour(dalpha1,dalpha2,Reg_P,[4 4]);
+[Reg_C,Reg_h] = contour(dalpha1,dalpha2,Reg_P,[5 5]);
 
 
 figure(2)

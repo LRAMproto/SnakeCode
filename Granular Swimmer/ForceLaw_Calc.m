@@ -39,11 +39,11 @@ for NN = 1:N
 
         % "Psi" is the angle between the axis of the element and instantaneous
         % velocity
-        psi(1) = atan(Xi1(2)/Xi1(1));% - (alpha(1));   % For link 1
+        psi(1) = atan2(Xi1(2),Xi1(1));% - (alpha(1));   % For link 1
 
-        psi(2) = atan(Xi2(2)/Xi2(1));                  % For link 2
+        psi(2) = atan2(Xi2(2),Xi2(1));                  % For link 2
 
-        psi(3) = atan(Xi3(2)/Xi3(1));% - (alpha(2));   % For link 3
+        psi(3) = atan2(Xi3(2),Xi3(1));% - (alpha(2));   % For link 3
 
         
         
@@ -95,8 +95,8 @@ for NN = 1:N
             case 'real_model'
                 
                 % "beta" is an angle used in drag forces defined as follow and "gama" is a constant parameter
-                beta0 = atan(cot(S.gama)*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
-                beta0p = atan(cot(S.gama)*[sin(pi/2 - psi(1)) sin(pi/2 - psi(2)) sin(pi/2 - psi(3))]);
+                beta0 = atan(cot(S.Cyl_gama)*[sin(psi(1)) sin(psi(2)) sin(psi(3))]);
+                beta0p = atan(cot(S.Cyl_gama)*[sin(pi/2 - psi(1)) sin(pi/2 - psi(2)) sin(pi/2 - psi(3))]);
                 
                 % 'e' is a parameter that can change the head surface between flat
                 % circle or semi-sphare. e = 1 ---> flat head, e = 4 --->
@@ -104,8 +104,8 @@ for NN = 1:N
                 e = 4;
                 
                 % C_F, C_L, C_F are constant parameters obtained from experience 
-                Fx = [2*(delta_L)*S.r*(S.C_F*cos(psi(1))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.C_F*cos(psi(2))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.C_F*cos(psi(3))) + e*pi*(S.r^2)*S.C_S*(sin(beta0p(3)))];
-                Fy = [2*(delta_L)*S.r*(S.C_S*sin(beta0(1)) + S.C_F*(sin(psi(1)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(2)) + S.C_F*(sin(psi(2)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.C_S*sin(beta0(3)) + S.C_F*(sin(psi(3)))) + e*pi*(S.r^2)*S.C_F*(sin(psi(3)))];
+                Fx = [2*(delta_L)*S.r*(S.Cyl_C_F*cos(psi(1))) + e*pi*(S.r^2)*S.Cyl_C_S*(sin(beta0p(1)))  2*(delta_L)*S.r*(S.Cyl_C_F*cos(psi(2))) + e*pi*(S.r^2)*S.Cyl_C_S*(sin(beta0p(2)))  2*(delta_L)*S.r*(S.Cyl_C_F*cos(psi(3))) + e*pi*(S.r^2)*S.Cyl_C_S*(sin(beta0p(3)))];
+                Fy = [2*(delta_L)*S.r*(S.Cyl_C_S*sin(beta0(1)) + S.Cyl_C_F*(sin(psi(1)))) + e*pi*(S.r^2)*S.Cyl_C_F*(sin(psi(1)))  2*(delta_L)*S.r*(S.Cyl_C_S*sin(beta0(2)) + S.Cyl_C_F*(sin(psi(2)))) + e*pi*(S.r^2)*S.Cyl_C_F*(sin(psi(2)))  2*(delta_L)*S.r*(S.Cyl_C_S*sin(beta0(3)) + S.Cyl_C_F*(sin(psi(3)))) + e*pi*(S.r^2)*S.Cyl_C_F*(sin(psi(3)))];
                 M  = [0 0 0];
                 
         end
@@ -122,7 +122,7 @@ for NN = 1:N
         % Sum up the forces on each link and then the whole force of the
         % system
         if ~exist('F_h','var')
-            F_h = [];
+            F_h = zeros(3,3);
         end
         
         F1 = F1 + (F(:,NN)) + F_h(:,NN);

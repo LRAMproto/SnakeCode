@@ -1,4 +1,4 @@
-function [A,C_data,C_ellipse_data,Reg_C_data] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
+function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
 
 
     for i = 1:length(dalpha(1,:))
@@ -107,20 +107,27 @@ switch mode
             % This function Plot the power as an contour and extract the data of
             % the contour in desire power.
             % 'Reg_C' is the elliptic cone estimation of power plot
-            [P,C,Reg_C] = Power_Plot(T1,T2,dalpha,n);
+            [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n);
             
-            Reg_C_data = Reg_C(:,2:end);
+%             Reg_C_data = Reg_C(:,2:end);
 
             % Seperate the data of the contour for specific power and put them into
             % the individual cell.
             [C_Max1,C_Indx1] = find(C(1,:) == C(1,1));
+            [Reg_C_Max1,Reg_C_Indx1] = find(Reg_C(1,:) == Reg_C(1,1));
 
             for m = 1:length(C_Indx1)
 
                 C_data{m} = C(:,C_Indx1(m)+1:C_Indx1(m)+C(2,C_Indx1(m)));
 
             end
+            
+            for m = 1:length(Reg_C_Indx1)
 
+                Reg_C_data{m} = Reg_C(:,Reg_C_Indx1(m)+1:Reg_C_Indx1(m)+Reg_C(2,Reg_C_Indx1(m)));
+
+            end
+            
             % This part evaluate the power plot by scaling different
             % contour of power at the same size and then comparissing them
             if S.Power_comparison

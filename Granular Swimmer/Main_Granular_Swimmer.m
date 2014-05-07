@@ -16,6 +16,10 @@ S.head_C_S = 42.16;        % Granular parameter
 S.head_C_F = 1.87;         % Granular parameter
 S.head_C_L = -1.58;        % Granular parameter
 S.head_gama = 0.088;       % Granular parameter
+% Cylindrical shape parameters
+S.Cyl_C_S = 0.77*10^4;    % Granular parameter
+S.Cyl_C_F = 0.59*10^4;    % Granular parameter
+S.Cyl_gama = 12.21*pi/180;        % Granular parameter
 
 S.Power_comparison = 0;    % If power comparison of different contour is required put 1 otherwise put 0.
 
@@ -27,8 +31,8 @@ dalpha1 = linspace(-1,1,11);
 dalpha2 = linspace(-1,1,11);
 
 % Range of variation of alpha (shape change)
-R_alpha1 = linspace(-2.5,2.5,11);
-R_alpha2 = linspace(-2.5,2.5,11);
+R_alpha1 = linspace(-2.5,2.5,7);
+R_alpha2 = linspace(-2.5,2.5,7);
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -98,12 +102,13 @@ for i = 1:length(R_alpha1)
         Xi.theta = Xi0.theta{i,j};
         alpha = [R_alpha1(i); R_alpha2(j)];
         
-        [A,C_data,C_ellipse_data,Reg_C_data] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
+        [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
 
         A1{i,j} = A;
         Contour_data{i,j} = C_data;
         Contour_ellipse_data{i,j} = C_ellipse_data;
         Contour_Reg_C_data{i,j} = Reg_C_data;
+        Metric_Tensor_cell{i,j} = Metric_Tensor;
 
     end
      
@@ -155,7 +160,9 @@ Vecfield = cell(2,1);
 
 % This function get the metric and grid for shape angles and plot ellipse
 % field of a metric tensor (Mp)
-h = metricellipsefield_power(Vecfield{1},Vecfield{2},Contour_Reg_C_data,'tissot',{});
+h = metricellipsefield_power1(Vecfield{1},Vecfield{2},Contour_Reg_C_data,'tissot',{});
+
+h1 = metricellipsefield(Vecfield{1},Vecfield{2},Metric_Tensor_cell,'tissot',{});
 
 
 figure(4)
