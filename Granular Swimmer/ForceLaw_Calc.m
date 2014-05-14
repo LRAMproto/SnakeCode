@@ -49,7 +49,7 @@ for NN = 1:N
         
         % Drag Forces in Granular Environment
         switch S.Model
-        
+                    
             case 'basic_model'
                             
                 % "beta" is an angle used in drag forces defined as follow and "gama" is a constant parameter

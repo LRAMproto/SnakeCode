@@ -1,5 +1,7 @@
-clc
-clear all
+% clc
+% clear all
+
+function P = Main_Granular_Swimmer(alpha,dalpha)
 
 % Initial Values
 S.L = 1;                   % The link length
@@ -26,13 +28,24 @@ S.Power_comparison = 0;    % If power comparison of different contour is require
 S.Range = 8;               % Number of segments in each link for integrating
 S.Model = 'basic_model';
 
+% Choose whether you want to calculate power field (Power_field) or power
+% for any gait (Power_for_gait)
+
+S.power_type = 'Power_for_gait';
+
 % Shape Velocity
-dalpha1 = linspace(-1,1,11);
-dalpha2 = linspace(-1,1,11);
+% dalpha1 = linspace(-1,1,11);
+% dalpha2 = linspace(-1,1,11);
+
+dalpha1 = dalpha(1);
+dalpha2 = dalpha(2);
 
 % Range of variation of alpha (shape change)
-R_alpha1 = linspace(-2.5,2.5,7);
-R_alpha2 = linspace(-2.5,2.5,7);
+% R_alpha1 = linspace(-2.5,2.5,11);
+% R_alpha2 = linspace(-2.5,2.5,11);
+
+R_alpha1 = alpha(1);
+R_alpha2 = alpha(2);
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -102,7 +115,7 @@ for i = 1:length(R_alpha1)
         Xi.theta = Xi0.theta{i,j};
         alpha = [R_alpha1(i); R_alpha2(j)];
         
-        [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
+        [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
 
         A1{i,j} = A;
         Contour_data{i,j} = C_data;
@@ -114,73 +127,90 @@ for i = 1:length(R_alpha1)
      
 end
 
+switch S.power_type
 
-Ar_woven = cell2mat(A1);
+    case 'Power_for_gait'
 
-%Rearrange the A matrix
-Ar = [ Ar_woven(1:3:end,1:2:end) Ar_woven(1:3:end,2:2:end);
-	   Ar_woven(2:3:end,1:2:end) Ar_woven(2:3:end,2:2:end);
-	   Ar_woven(3:3:end,1:2:end) Ar_woven(3:3:end,2:2:end)];
+        % Do nothing
+
+    case 'Power_field'
+
+        Ar_woven = cell2mat(A1);
+
+        %Rearrange the A matrix
+        Ar = [ Ar_woven(1:3:end,1:2:end) Ar_woven(1:3:end,2:2:end);
+               Ar_woven(2:3:end,1:2:end) Ar_woven(2:3:end,2:2:end);
+               Ar_woven(3:3:end,1:2:end) Ar_woven(3:3:end,2:2:end)];
 
 
-[alpha1,alpha2] = ndgrid(R_alpha1,R_alpha2);
+        [alpha1,alpha2] = ndgrid(R_alpha1,R_alpha2);
 
-Ax1 = Ar_woven(1:3:end,1:2:end);
-Ax2 = Ar_woven(1:3:end,2:2:end);
+        Ax1 = Ar_woven(1:3:end,1:2:end);
+        Ax2 = Ar_woven(1:3:end,2:2:end);
 
-Ay1 = Ar_woven(2:3:end,1:2:end);
-Ay2 = Ar_woven(2:3:end,2:2:end);
+        Ay1 = Ar_woven(2:3:end,1:2:end);
+        Ay2 = Ar_woven(2:3:end,2:2:end);
 
-Atheta1 = Ar_woven(3:3:end,1:2:end);
-Atheta2 = Ar_woven(3:3:end,2:2:end);
+        Atheta1 = Ar_woven(3:3:end,1:2:end);
+        Atheta2 = Ar_woven(3:3:end,2:2:end);
 
-LocalConnectionMatrix = 'Local_Connection_Matrix.mat';
+        LocalConnectionMatrix = 'Local_Connection_Matrix.mat';
 
-if exist(LocalConnectionMatrix,'file')
+        if exist(LocalConnectionMatrix,'file')
 
-    % Load the Local_Connection file
-    load('Local_Connection_Matrix');
+            % Load the Local_Connection file
+            load('Local_Connection_Matrix');
 
-else
+        else
 
-    Current_path = pwd;
-    dp = '\Users\Hossein\Documents\MATLAB\Dr Hatton Snake Robot\GeometricSystemPlotter\UserFiles\v4\Hossein\Systems';
+            Current_path = pwd;
+            dp = '\Users\Hossein\Documents\MATLAB\Dr Hatton Snake Robot\GeometricSystemPlotter\UserFiles\v4\Hossein\Systems';
 
-    cd(dp)
+            cd(dp)
 
-    save('Local_Connection_Matrix','Ax1','Ax2','Ay1','Ay2','Atheta1','Atheta2','alpha1','alpha2')
+            save('Local_Connection_Matrix','Ax1','Ax2','Ay1','Ay2','Atheta1','Atheta2','alpha1','alpha2')
 
-    cd(Current_path)
+            cd(Current_path)
+
+        end
+
+        Vecfield = cell(2,1);
+
+        [Vecfield{:}] = ndgrid(R_alpha1);
+
+        % This function get the power for any shape angle and plot them as a field
+        h = metricellipsefield_power1(Vecfield{1},Vecfield{2},Contour_data,'tissot',{});
+
+        % This function get the metric and grid for shape angles and plot ellipse
+        % field of a metric tensor (Mp)
+        h1 = metricellipsefield(Vecfield{1},Vecfield{2},Metric_Tensor_cell,'tissot',{});
+
+        % Rearrange the Metric Tensor
+        Metric_Tensor_raw = cell2mat(Metric_Tensor_cell);
+        % Metric_Tensor = [{Metric_Tensor(1:2:end,1:2:end)} {Metric_Tensor(1:2:end,2:2:end)};{Metric_Tensor(2:2:end,1:2:end)} {Metric_Tensor(2:2:end,2:2:end)}];
+
+        % Save the Metric Tensor
+        save('Granular_Metric_Tensor','Metric_Tensor_raw','alpha1','alpha2')
+
+
+        figure(4)
+        quiver(alpha1,alpha2,Ar_woven(1:3:end,1:2:end),Ar_woven(1:3:end,2:2:end))
+        axis equal
+        xlabel('\alpha_1');
+        ylabel('\alpha_2');
+
+        figure(5)
+        quiver(alpha1,alpha2,Ar_woven(2:3:end,1:2:end),Ar_woven(2:3:end,2:2:end))
+        axis equal
+        xlabel('\alpha_1');
+        ylabel('\alpha_2');
+
+        figure(6)
+        quiver(alpha1,alpha2,Ar_woven(3:3:end,1:2:end),Ar_woven(3:3:end,2:2:end))
+        axis equal
+
+        xlabel('\alpha_1');
+        ylabel('\alpha_2');
+        axis square
 
 end
-
-Vecfield = cell(2,1);
-
-[Vecfield{:}] = ndgrid(R_alpha1);
-
-% This function get the metric and grid for shape angles and plot ellipse
-% field of a metric tensor (Mp)
-h = metricellipsefield_power1(Vecfield{1},Vecfield{2},Contour_Reg_C_data,'tissot',{});
-
-h1 = metricellipsefield(Vecfield{1},Vecfield{2},Metric_Tensor_cell,'tissot',{});
-
-
-figure(4)
-quiver(alpha1,alpha2,Ar_woven(1:3:end,1:2:end),Ar_woven(1:3:end,2:2:end))
-axis equal
-xlabel('\alpha_1');
-ylabel('\alpha_2');
-
-figure(5)
-quiver(alpha1,alpha2,Ar_woven(2:3:end,1:2:end),Ar_woven(2:3:end,2:2:end))
-axis equal
-xlabel('\alpha_1');
-ylabel('\alpha_2');
-
-figure(6)
-quiver(alpha1,alpha2,Ar_woven(3:3:end,1:2:end),Ar_woven(3:3:end,2:2:end))
-axis equal
-
-xlabel('\alpha_1');
-ylabel('\alpha_2');
-axis square

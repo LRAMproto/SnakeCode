@@ -1,4 +1,4 @@
-function [T] = Metric_Calc(Xi,alpha,dalpha,S)
+function [T] = Torque_Calc(Xi,alpha,dalpha,S)
 
 % Initial Value
 T1 = 0; T2 = 0;
@@ -47,7 +47,7 @@ for i = 1:S.Range
 
         % Drag Forces in Granular Environment
         switch S.Model
-        
+                    
             case 'basic_model'
                 
                 % "beta" is an angle used in drag forces defined as follow and "gama" is a constant parameter
@@ -108,9 +108,6 @@ for i = 1:S.Range
                     
                 end
                 
-%                 Fx = Fx_head + Fx_b;
-%                 Fy = Fy_head + Fy_b;
-%                 M = M_head + M_b;
                 
             case 'real_model'
                 

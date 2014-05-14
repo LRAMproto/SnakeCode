@@ -1,4 +1,4 @@
-function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
+function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
 
 
     for i = 1:length(dalpha(1,:))
@@ -24,7 +24,7 @@ function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_
             Xi.theta(i,j) = Xi1(3);
             
             % Compute the torques using the body velocity
-%             [T] = Metric_Calc(Xi1,alpha,dalpha_p,S);
+%             [T] = Torque_Calc(Xi1,alpha,dalpha_p,S);
 %             
 %             T1(i,j) = T(1);
 %             
@@ -41,7 +41,7 @@ function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_
     
     % This function calculate the gradient of Body Velocity and create the
     % Local Connection for a given shape angle (alpha)
-    A = ConnectionVector_Calc1(Reg);
+%     A = ConnectionVector_Calc1(Reg);
     
 
 %% Compute the Torques on each joint using the regression of Body Velocity
@@ -57,7 +57,7 @@ function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor] = Connection_Vector_
             Xi1(2) = Reg.y(i,j);
             Xi1(3) = Reg.theta(i,j);
             
-            [T] = Metric_Calc(Xi1,alpha,dalpha_p,S);
+            [T] = Torque_Calc(Xi1,alpha,dalpha_p,S);
             
             T1(i,j) = T(1);
             
@@ -84,7 +84,6 @@ switch mode
 
         % Seperate the data of the contour for specific power and put them into
         % the individual cell.
-
         [C_Max1,C_Indx1] = find(C(1,:) == C(1,1));
 
         for m = 1:length(C_Indx1)
@@ -107,58 +106,71 @@ switch mode
             % This function Plot the power as an contour and extract the data of
             % the contour in desire power.
             % 'Reg_C' is the elliptic cone estimation of power plot
-            [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n);
+            [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n,S);
             
-%             Reg_C_data = Reg_C(:,2:end);
+            switch S.power_type
+                
+                case 'Power_for_gait'
+        
+                    % Do nothing
+                    C_data = [];
+                    C_ellipse_data = [];
+                    Reg_C_data = [];
+                    Metric_Tensor = [];
+                    A = [];
+        
+                case 'Power_field'
 
-            % Seperate the data of the contour for specific power and put them into
-            % the individual cell.
-            [C_Max1,C_Indx1] = find(C(1,:) == C(1,1));
-            [Reg_C_Max1,Reg_C_Indx1] = find(Reg_C(1,:) == Reg_C(1,1));
+                    % Seperate the data of the contour for specific power and put them into
+                    % the individual cell.
+                    [C_Max1,C_Indx1] = find(C(1,:) == C(1,1));
+                    [Reg_C_Max1,Reg_C_Indx1] = find(Reg_C(1,:) == Reg_C(1,1));
 
-            for m = 1:length(C_Indx1)
+                    for m = 1:length(C_Indx1)
 
-                C_data{m} = C(:,C_Indx1(m)+1:C_Indx1(m)+C(2,C_Indx1(m)));
+                        C_data{m} = C(:,C_Indx1(m)+1:C_Indx1(m)+C(2,C_Indx1(m)));
+
+                    end
+
+                    for m = 1:length(Reg_C_Indx1)
+
+                        Reg_C_data{m} = Reg_C(:,Reg_C_Indx1(m)+1:Reg_C_Indx1(m)+Reg_C(2,Reg_C_Indx1(m)));
+
+                    end
+
+                    % This part evaluate the power plot by scaling different
+                    % contour of power at the same size and then comparissing them
+                    if S.Power_comparison
+
+                        circles1 = Power_Comparison(C_data,'Power_Comparison',{});
+
+                        figure(3)
+
+                        if n == 3
+
+                            PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
+                            legend('Power = 4','Power = 6', 'Power = 8')
+                            str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
+                            title(str)
+                            axis equal
+                            axis square
+
+                        elseif n == 1
+
+                            PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','black','LineWidth',2),circles1);
+
+                        else
+
+                            PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','blue','LineWidth',2),circles1);
+
+                        end
+
+                        hold on
+
+                    end % end of power comparison
 
             end
             
-            for m = 1:length(Reg_C_Indx1)
-
-                Reg_C_data{m} = Reg_C(:,Reg_C_Indx1(m)+1:Reg_C_Indx1(m)+Reg_C(2,Reg_C_Indx1(m)));
-
-            end
-            
-            % This part evaluate the power plot by scaling different
-            % contour of power at the same size and then comparissing them
-            if S.Power_comparison
-            
-                circles1 = Power_Comparison(C_data,'Power_Comparison',{});
-
-                figure(3)
-
-                if n == 3
-
-                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','red','LineWidth',2),circles1);
-                    legend('Power = 4','Power = 6', 'Power = 8')
-                    str = sprintf('alpha1 = %f, alpha2 = %f',alpha(1),alpha(2));
-                    title(str)
-                    axis equal
-                    axis square
-
-                elseif n == 1
-
-                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','black','LineWidth',2),circles1);
-
-                else
-
-                    PC = cellfun(@(u)plot(u(1,:),u(2,:),'color','blue','LineWidth',2),circles1);
-
-                end
-
-                hold on
-            
-            end % end of power comparison
-
         end
         
         C_ellipse_data = {};
