@@ -41,7 +41,7 @@ function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vecto
     
     % This function calculate the gradient of Body Velocity and create the
     % Local Connection for a given shape angle (alpha)
-%     A = ConnectionVector_Calc1(Reg);
+    A = ConnectionVector_Calc1(Reg);
     
 
 %% Compute the Torques on each joint using the regression of Body Velocity

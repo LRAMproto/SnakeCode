@@ -34,11 +34,11 @@ S.Model = 'basic_model';
 S.power_type = 'Power_for_gait';
 
 % Shape Velocity
-% dalpha1 = linspace(-1,1,11);
-% dalpha2 = linspace(-1,1,11);
+dalpha1 = linspace(-1.5,1.5,11);
+dalpha2 = linspace(-1.5,1.5,11);
 
-dalpha1 = dalpha(1);
-dalpha2 = dalpha(2);
+% dalpha1 = dalpha(1);
+% dalpha2 = dalpha(2);
 
 % Range of variation of alpha (shape change)
 % R_alpha1 = linspace(-2.5,2.5,11);
@@ -133,7 +133,7 @@ switch S.power_type
 
         % Do nothing
 
-    case 'Power_field'
+    case 'Power_field1'
 
         Ar_woven = cell2mat(A1);
 
