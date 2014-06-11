@@ -1,4 +1,4 @@
-function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
+function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P,Reg_P] = Connection_Vector_Solver(Xi0,S,alpha,R_alpha,dalpha)
 
 
     for i = 1:length(dalpha(1,:))
@@ -41,7 +41,9 @@ function [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vecto
     
     % This function calculate the gradient of Body Velocity and create the
     % Local Connection for a given shape angle (alpha)
-    A = ConnectionVector_Calc1(Reg);
+    if  strcmp(S.power_type,'Power_field')
+        A = ConnectionVector_Calc1(Reg);
+    end
     
 
 %% Compute the Torques on each joint using the regression of Body Velocity
@@ -106,7 +108,7 @@ switch mode
             % This function Plot the power as an contour and extract the data of
             % the contour in desire power.
             % 'Reg_C' is the elliptic cone estimation of power plot
-            [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n,S);
+            [P,Reg_P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n,S);
             
             switch S.power_type
                 
@@ -189,56 +191,65 @@ end % end switch
     
     % Plot the Body Velocities
 %     figure(1)
+%     subplot(2,3,1);
 %     surf(dalpha1,dalpha2,Xi.x)
+%     title('\xi_x');
 %     xlabel('d\alpha_1');
 %     ylabel('d\alpha_2');
 %     zlabel('\xi_x')
 %     axis equal
 %     axis square
 % 
-%     figure(2)
+% %     figure(2)
+%     subplot(2,3,2);
 %     surf(dalpha1,dalpha2,Xi.y)
+%     title('\xi_y');
 %     xlabel('d\alpha_1');
 %     ylabel('d\alpha_2');
 %     zlabel('\xi_y')
 %     axis equal
 %     axis square
 % 
-%     figure(3)
+% %     figure(3)
+%     subplot(2,3,3);
 %     surf(dalpha1,dalpha2,Xi.theta)
+%     title('\xi_\theta');
 %     xlabel('d\alpha_1');
 %     ylabel('d\alpha_2');
 %     zlabel('\xi_\theta')
 %     axis equal
 %     axis square
 
-end
+% end
     
     % Plot fitting the regression plane
-    % figure(4)
-    % surf(dalpha1, dalpha2,Reg.Xi_x)
-    % title('\xi_x After Regression');
-    % xlabel('d\alpha_1');
-    % ylabel('d\alpha_2');
-    % zlabel('\xi_x')
-    % axis equal
-    % axis square
-    % 
-    % figure(5)
-    % surf(dalpha1, dalpha2,Reg.Xi_y)
-    % title('\xi_y After Regression');
-    % xlabel('d\alpha_1');
-    % ylabel('d\alpha_2');
-    % zlabel('\xi_y')
-    % axis equal
-    % axis square
-    % 
-    % figure(6)
-    % surf(dalpha1, dalpha2,Reg.Xi_theta)
-    % title('\xi_\theta After Regression');
-    % xlabel('d\alpha_1');
-    % ylabel('d\alpha_2');
-    % zlabel('\xi_\theta')
-    % axis equal
-    % axis square
+% %     figure(4)
+%     subplot(2,3,4);
+%     surf(dalpha1, dalpha2,Reg.x)
+%     title('\xi_x After Regression');
+%     xlabel('d\alpha_1');
+%     ylabel('d\alpha_2');
+%     zlabel('\xi_x')
+%     axis equal
+%     axis square
+%     
+% %     figure(5)
+%     subplot(2,3,5);
+%     surf(dalpha1, dalpha2,Reg.y)
+%     title('\xi_y After Regression');
+%     xlabel('d\alpha_1');
+%     ylabel('d\alpha_2');
+%     zlabel('\xi_y')
+%     axis equal
+%     axis square
+%     
+% %     figure(6)
+%     subplot(2,3,6);
+%     surf(dalpha1, dalpha2,Reg.theta)
+%     title('\xi_\theta After Regression');
+%     xlabel('d\alpha_1');
+%     ylabel('d\alpha_2');
+%     zlabel('\xi_\theta')
+%     axis equal
+%     axis square
     

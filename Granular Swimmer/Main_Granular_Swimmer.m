@@ -1,7 +1,7 @@
-% clc
-% clear all
+clc
+clear all
 
-function P = Main_Granular_Swimmer(alpha,dalpha)
+% function P = Main_Granular_Swimmer(alpha,dalpha)
 
 % Initial Values
 S.L = 1;                   % The link length
@@ -31,21 +31,27 @@ S.Model = 'basic_model';
 % Choose whether you want to calculate power field (Power_field) or power
 % for any gait (Power_for_gait)
 
-S.power_type = 'Power_for_gait';
+S.power_type = 'Power_field';
 
-% Shape Velocity
-dalpha1 = linspace(-1.5,1.5,11);
-dalpha2 = linspace(-1.5,1.5,11);
+if  strcmp(S.power_type,'Power_field')
 
-% dalpha1 = dalpha(1);
-% dalpha2 = dalpha(2);
+    % Shape Velocity
+    dalpha1 = linspace(-3,3,11);
+    dalpha2 = linspace(-3,3,11);
 
-% Range of variation of alpha (shape change)
-% R_alpha1 = linspace(-2.5,2.5,11);
-% R_alpha2 = linspace(-2.5,2.5,11);
+    % Range of variation of alpha (shape change)
+    R_alpha1 = linspace(-2.5,2.5,11);
+    R_alpha2 = linspace(-2.5,2.5,11);
 
-R_alpha1 = alpha(1);
-R_alpha2 = alpha(2);
+else
+
+    dalpha1 = dalpha(1);
+    dalpha2 = dalpha(2);
+
+    R_alpha1 = alpha(1);
+    R_alpha2 = alpha(2);
+
+end
 
 target = fullfile(pwd,'Main_Granular_Swimmer.m');
 
@@ -67,7 +73,7 @@ if exist(BodyVelocityfile,'file')
     % This function check if the target function is older than any file it 
     % depends on, or younger than any file it produces.
     dcheck = depcheck(target,refrence);
-    
+   
 end
 if ~exist(BodyVelocityfile,'file') || ~dcheck
     
@@ -115,17 +121,21 @@ for i = 1:length(R_alpha1)
         Xi.theta = Xi0.theta{i,j};
         alpha = [R_alpha1(i); R_alpha2(j)];
         
-        [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
+        [A,C_data,C_ellipse_data,Reg_C_data,Metric_Tensor,P,Reg_P] = Connection_Vector_Solver(Xi,S,alpha,[R_alpha1; R_alpha2],[dalpha1; dalpha2]);
 
         A1{i,j} = A;
         Contour_data{i,j} = C_data;
         Contour_ellipse_data{i,j} = C_ellipse_data;
         Contour_Reg_C_data{i,j} = Reg_C_data;
         Metric_Tensor_cell{i,j} = Metric_Tensor;
+        Power_field{i,j} = P;
+        Power_field_Reg{i,j} = Reg_P;
+        
 
     end
      
 end
+
 
 switch S.power_type
 
@@ -133,7 +143,15 @@ switch S.power_type
 
         % Do nothing
 
-    case 'Power_field1'
+    case 'Power_field'
+        
+        Current_path = pwd;
+        
+        cd(fullfile(Current_path,'granular_data'));
+        
+        save('power_data','Power_field');
+        
+        cd(Current_path)
 
         Ar_woven = cell2mat(A1);
 
@@ -191,6 +209,10 @@ switch S.power_type
 
         % Save the Metric Tensor
         save('Granular_Metric_Tensor','Metric_Tensor_raw','alpha1','alpha2')
+        
+        % Save the power data
+        [dalpha1,dalpha2] = ndgrid(dalpha1,dalpha2);
+        save('Power_bowl_shape','Power_field','Power_field_Reg','Metric_Tensor_cell','dalpha1','dalpha2','Vecfield');
 
 
         figure(4)

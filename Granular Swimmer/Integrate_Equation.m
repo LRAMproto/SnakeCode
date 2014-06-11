@@ -11,6 +11,8 @@ function [Xi] = Integrate_Equation(FUN, Xi0,alpha,dalpha,S)
     
 %     options = optimset('Display','Iter','TolX',1e-1,'TolFun',1e0);   % Option to display output
 
+%     options = optimset('Display','Iter','TolX',1e-1,'TolFun',1e0);   % Option to display output
+
 
     [Xi] = fminsearch(FUN,Xi,options,alpha,dalpha,S,N,delta_L);
         

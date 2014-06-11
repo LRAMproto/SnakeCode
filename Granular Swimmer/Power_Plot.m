@@ -1,4 +1,4 @@
-function [P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n,S)
+function [P,Reg_P,C,Reg_C,Metric_Tensor] = Power_Plot(T1,T2,dalpha,n,S)
 % This function plot the contour of the Power dissipated through the joints
 % as a function of shape velocities for determined shape angles
 dalpha1 = dalpha(1,:);
